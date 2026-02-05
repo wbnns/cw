@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claude-worktrees"
+version = "0.1.0"
+description = "A CLI tool for managing Git worktrees for parallel Claude Code instances"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Claude Worktrees Team" }
+]
+dependencies = [
+    "click>=8.0",
+    "rich>=13.0",
+    "tomli>=2.0;python_version<'3.11'",
+]
+
+[project.scripts]
+cw = "claude_worktrees.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/claude_worktrees"]
