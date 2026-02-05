@@ -121,7 +121,15 @@ check_pr_status = true  # Check PR merge status via gh CLI
 
 ## Automatic Cleanup
 
-A git `post-merge` hook is installed that runs `cw cleanup --auto` after each `git pull`. This removes worktrees whose branches have been merged into main.
+Running `cw` automatically:
+1. Pulls latest changes from remote (if configured)
+2. Triggers the `post-merge` hook which cleans up stale worktrees
+
+Worktrees are cleaned up when:
+- **Branch merged locally** - detected via `git branch --merged`
+- **PR merged on GitHub** - detected via `gh` CLI
+- **PR closed on GitHub** - abandoned PRs
+- **Older than 7 days** - with no active PR (for repos without GitHub)
 
 ## Directory Structure
 

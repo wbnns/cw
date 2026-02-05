@@ -29,8 +29,11 @@ from .worktree import (
     get_git_root,
     get_main_branch,
     get_repo_name,
+    get_worktree_age_days,
     get_worktree_disk_usage,
     get_worktree_path,
+    git_pull,
+    has_remote,
     has_uncommitted_changes,
     is_branch_merged,
     list_managed_worktrees,
@@ -79,6 +82,11 @@ def cli(ctx):
 
         # Auto-initialize (config, hooks) if not already done
         auto_init()
+
+        # Pull latest changes (triggers post-merge hook for cleanup)
+        if has_remote():
+            console.print("Pulling latest changes...")
+            git_pull()
 
         # Create branch name from unix timestamp
         timestamp = int(time.time())
@@ -302,19 +310,32 @@ def cleanup(dry_run: bool, force: bool, auto: bool):
 
     main_branch = get_main_branch()
     check_pr = should_check_pr_status()
+    max_age_days = 7  # Clean up worktrees older than 7 days with no active PR
 
     to_remove = []
 
     for wt in worktrees:
         merged_git = is_branch_merged(wt.branch, main_branch)
         closed_pr = is_pr_closed(wt.branch) if check_pr else False
+        age_days = get_worktree_age_days(wt.path)
 
-        if merged_git or closed_pr:
+        # Check if worktree is stale (old with no active PR)
+        stale = False
+        if age_days >= max_age_days:
+            if check_pr:
+                pr_info = get_pr_for_branch(wt.branch)
+                # Stale if no PR or PR is not open
+                stale = pr_info is None or pr_info.is_closed
+            else:
+                # No GitHub - use age-based cleanup
+                stale = True
+
+        if merged_git or closed_pr or stale:
             to_remove.append(wt)
 
     if not to_remove:
         if not auto:
-            console.print("[dim]No merged worktrees to clean up.[/dim]")
+            console.print("[dim]No worktrees to clean up.[/dim]")
         return
 
     if dry_run:

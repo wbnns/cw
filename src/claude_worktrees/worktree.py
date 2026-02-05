@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -262,3 +263,47 @@ def format_size(size_bytes: int) -> str:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024
     return f"{size_bytes:.1f} TB"
+
+
+def has_remote() -> bool:
+    """Check if the repository has a remote configured."""
+    result = subprocess.run(
+        ["git", "remote"],
+        capture_output=True,
+        text=True,
+    )
+    return bool(result.stdout.strip())
+
+
+def git_pull() -> tuple[bool, str]:
+    """Run git pull. Returns (success, message)."""
+    if not has_remote():
+        return True, "No remote configured"
+
+    result = subprocess.run(
+        ["git", "pull", "--ff-only"],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode == 0:
+        return True, "Pulled latest changes"
+    else:
+        # Don't fail on pull errors (might be offline, etc.)
+        return True, "Could not pull (offline or conflicts)"
+
+
+def get_worktree_age_days(path: Path) -> int:
+    """Get the age of a worktree in days based on last modification time."""
+    try:
+        # Use the .git file in the worktree as the reference
+        git_file = path / ".git"
+        if git_file.exists():
+            mtime = git_file.stat().st_mtime
+        else:
+            mtime = path.stat().st_mtime
+
+        age_seconds = time.time() - mtime
+        return int(age_seconds / 86400)  # Convert to days
+    except (OSError, ValueError):
+        return 0
