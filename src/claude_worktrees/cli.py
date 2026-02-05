@@ -19,7 +19,7 @@ from .config import (
     should_check_pr_status,
 )
 from .deps import cleanup_symlinks, setup_dependencies
-from .github import get_pr_for_branch, get_pr_status_badge, is_pr_merged
+from .github import get_pr_for_branch, get_pr_status_badge, is_pr_closed
 from .hooks import install_all_hooks
 from .worktree import (
     branch_exists,
@@ -307,9 +307,9 @@ def cleanup(dry_run: bool, force: bool, auto: bool):
 
     for wt in worktrees:
         merged_git = is_branch_merged(wt.branch, main_branch)
-        merged_pr = is_pr_merged(wt.branch) if check_pr else False
+        closed_pr = is_pr_closed(wt.branch) if check_pr else False
 
-        if merged_git or merged_pr:
+        if merged_git or closed_pr:
             to_remove.append(wt)
 
     if not to_remove:

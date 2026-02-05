@@ -107,3 +107,9 @@ def is_pr_merged(branch: str) -> bool:
     """Quick check if a PR for a branch has been merged."""
     pr_info = get_pr_for_branch(branch)
     return pr_info is not None and pr_info.is_merged
+
+
+def is_pr_closed(branch: str) -> bool:
+    """Quick check if a PR for a branch is closed (merged or closed without merging)."""
+    pr_info = get_pr_for_branch(branch)
+    return pr_info is not None and pr_info.is_closed
