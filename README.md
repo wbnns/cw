@@ -4,8 +4,11 @@ Git worktree manager for running multiple Claude Code instances in parallel.
 
 ## Installation
 
+Clone or download this repository anywhere on your system, then install with pipx:
+
 ```bash
-pipx install -e ~/claude-worktrees
+git clone https://github.com/wbnns/claude-worktrees ~/claude-worktrees
+pipx install ~/claude-worktrees
 ```
 
 After installation, the `cw` command is available globally.
