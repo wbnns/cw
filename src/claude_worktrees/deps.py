@@ -9,12 +9,34 @@ from .config import get_deps_strategy, get_post_create_hook
 from .worktree import get_git_root
 
 
-# Common dependency directories to share
+# Common dependency directories to share (not build outputs)
 DEPENDENCY_DIRS = [
+    # JavaScript/Node
     "node_modules",
     ".pnpm-store",
-    "vendor",  # PHP/Go
-    ".venv",   # Python (optional, may cause issues)
+    ".yarn/cache",
+
+    # Ruby
+    "vendor/bundle",
+
+    # Python (note: may have path issues)
+    ".venv",
+    "venv",
+
+    # PHP (Composer)
+    "vendor",
+
+    # Go modules
+    "vendor",
+
+    # Elixir/Mix
+    "deps",
+
+    # iOS/macOS (CocoaPods)
+    "Pods",
+
+    # Java/Kotlin (Gradle cache)
+    ".gradle",
 ]
 
 

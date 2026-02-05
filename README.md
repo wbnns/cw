@@ -1,6 +1,6 @@
-# Claude Worktrees
+# cw
 
-A CLI tool for managing Git worktrees when running multiple Claude Code instances in parallel.
+Git worktree manager for running multiple Claude Code instances in parallel.
 
 ## Installation
 
@@ -21,10 +21,11 @@ cw
 ```
 
 That's it. Running `cw` with no arguments:
-1. Creates a new branch named `claude-<unix-timestamp>`
-2. Creates a worktree in `~/.claude-worktrees/<repo>/<branch>`
-3. Sets up dependency symlinks (node_modules, etc.)
-4. Launches Claude Code in the new worktree
+1. Auto-initializes config and git hooks (first run only)
+2. Creates a new branch named `claude-<unix-timestamp>`
+3. Creates a worktree in `~/.claude-worktrees/<repo>/<branch>`
+4. Symlinks dependency directories from the main repo
+5. Launches Claude Code in the new worktree
 
 ## Commands
 
@@ -40,6 +41,7 @@ Create a worktree with a specific branch name.
 cw new feature/auth          # Create new branch + worktree
 cw new --from existing-branch existing-branch  # Use existing branch
 cw new --no-claude           # Don't launch Claude Code
+cw new --no-deps             # Skip dependency symlinking
 ```
 
 ### `cw list`
@@ -66,7 +68,22 @@ Launch Claude Code in an existing worktree.
 
 ### `cw init`
 
-Initialize config and install git hooks for automatic cleanup after merges.
+Manually initialize config and git hooks. This runs automatically on first `cw` use, so you typically don't need this.
+
+## Dependency Sharing
+
+To avoid reinstalling dependencies for each worktree, `cw` symlinks common dependency directories from your main repo:
+
+- **JavaScript/Node:** `node_modules`, `.pnpm-store`, `.yarn/cache`
+- **Ruby:** `vendor/bundle`
+- **Python:** `.venv`, `venv`
+- **PHP:** `vendor`
+- **Go:** `vendor`
+- **Elixir:** `deps`
+- **iOS/macOS:** `Pods`
+- **Java/Kotlin:** `.gradle`
+
+All worktrees share the same dependencies, saving disk space and install time.
 
 ## Configuration
 
@@ -79,11 +96,21 @@ auto_cleanup = true
 
 [deps]
 strategy = "symlink"  # symlink | copy | custom
-# post_create_hook = "pnpm install --frozen-lockfile"
+# post_create_hook = "bundle install"  # for custom strategy
 
 [github]
-check_pr_status = true
+check_pr_status = true  # Check PR merge status via gh CLI
 ```
+
+### Dependency Strategies
+
+- **symlink** (default): Symlinks deps from main repo. Fast, saves space.
+- **copy**: Copy-on-write copies (macOS). Independent but space-efficient.
+- **custom**: Run your own command via `post_create_hook`.
+
+## Automatic Cleanup
+
+A git `post-merge` hook is installed that runs `cw cleanup --auto` after each `git pull`. This removes worktrees whose branches have been merged into main.
 
 ## Directory Structure
 
@@ -100,4 +127,4 @@ check_pr_status = true
 - Python 3.10+
 - Git
 - Claude Code CLI (`claude`)
-- `gh` CLI (optional, for PR status)
+- `gh` CLI (optional, for PR status checking)
