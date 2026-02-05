@@ -85,6 +85,17 @@ To avoid reinstalling dependencies for each worktree, `cw` symlinks common depen
 
 All worktrees share the same dependencies, saving disk space and install time.
 
+## Dotfiles
+
+`cw` also symlinks common environment dotfiles so your config is available in each worktree:
+
+- `.env`
+- `.env.local`
+- `.env.development`
+- `.env.development.local`
+- `.env.test`
+- `.env.test.local`
+
 ## Configuration
 
 Optional config at `~/.claude-worktrees.toml`:

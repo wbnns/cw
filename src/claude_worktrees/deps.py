@@ -9,6 +9,16 @@ from .config import get_deps_strategy, get_post_create_hook
 from .worktree import get_git_root
 
 
+# Common dotfiles to symlink (gitignored config files)
+DOTFILES = [
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.development.local",
+    ".env.test",
+    ".env.test.local",
+]
+
 # Common dependency directories to share (not build outputs)
 DEPENDENCY_DIRS = [
     # JavaScript/Node (Rails uses these too for assets)
@@ -66,18 +76,22 @@ def setup_dependencies(worktree_path: Path, strategy: str | None = None) -> tupl
 
 
 def _setup_symlinks(worktree_path: Path) -> tuple[bool, str]:
-    """Set up symlinks from main repo to worktree for dependency directories."""
+    """Set up symlinks from main repo to worktree for dependencies and dotfiles."""
     main_repo = get_git_root()
     if not main_repo:
         return False, "Could not find main repository"
 
     linked = []
 
+    # Symlink dependency directories
     for dep_dir in DEPENDENCY_DIRS:
         source = main_repo / dep_dir
         target = worktree_path / dep_dir
 
         if source.exists() and source.is_dir():
+            # Ensure parent directory exists for nested paths like vendor/bundle
+            target.parent.mkdir(parents=True, exist_ok=True)
+
             # Remove existing directory if it exists
             if target.exists():
                 if target.is_symlink():
@@ -89,10 +103,24 @@ def _setup_symlinks(worktree_path: Path) -> tuple[bool, str]:
             target.symlink_to(source)
             linked.append(dep_dir)
 
+    # Symlink dotfiles
+    for dotfile in DOTFILES:
+        source = main_repo / dotfile
+        target = worktree_path / dotfile
+
+        if source.exists() and source.is_file():
+            # Remove existing file if it exists
+            if target.exists() or target.is_symlink():
+                target.unlink()
+
+            # Create symlink
+            target.symlink_to(source)
+            linked.append(dotfile)
+
     if linked:
         return True, f"Symlinked: {', '.join(linked)}"
     else:
-        return True, "No dependency directories found to symlink"
+        return True, "No dependencies or dotfiles found to symlink"
 
 
 def _setup_copy_on_write(worktree_path: Path) -> tuple[bool, str]:
@@ -157,5 +185,10 @@ def cleanup_symlinks(worktree_path: Path) -> None:
     """Clean up symlinks before removing a worktree."""
     for dep_dir in DEPENDENCY_DIRS:
         target = worktree_path / dep_dir
+        if target.is_symlink():
+            target.unlink()
+
+    for dotfile in DOTFILES:
+        target = worktree_path / dotfile
         if target.is_symlink():
             target.unlink()
