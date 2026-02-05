@@ -75,8 +75,8 @@ Manually initialize config and git hooks. This runs automatically on first `cw` 
 To avoid reinstalling dependencies for each worktree, `cw` symlinks common dependency directories from your main repo:
 
 - **JavaScript/Node:** `node_modules`, `.pnpm-store`, `.yarn/cache`
-- **Ruby:** `vendor/bundle`
-- **Python:** `.venv`, `venv`
+- **Ruby/Rails:** `vendor/bundle`, `.bundle`
+- **Python/Django:** `.venv`, `venv`, `env`
 - **PHP:** `vendor`
 - **Go:** `vendor`
 - **Elixir:** `deps`

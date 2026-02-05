@@ -11,17 +11,19 @@ from .worktree import get_git_root
 
 # Common dependency directories to share (not build outputs)
 DEPENDENCY_DIRS = [
-    # JavaScript/Node
+    # JavaScript/Node (Rails uses these too for assets)
     "node_modules",
     ".pnpm-store",
     ".yarn/cache",
 
-    # Ruby
+    # Ruby/Rails
     "vendor/bundle",
+    ".bundle",
 
-    # Python (note: may have path issues)
+    # Python/Django
     ".venv",
     "venv",
+    "env",
 
     # PHP (Composer)
     "vendor",
