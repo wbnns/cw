@@ -50,6 +50,20 @@ def ensure_git_repo():
     return git_root
 
 
+def auto_init():
+    """Silently initialize if not already done (config + hooks)."""
+    # Create config if needed
+    if not CONFIG_PATH.exists():
+        create_default_config()
+
+    # Create worktree base directory
+    worktree_base = get_worktree_base()
+    worktree_base.mkdir(parents=True, exist_ok=True)
+
+    # Install hooks silently
+    install_all_hooks()
+
+
 @click.group(invoke_without_command=True)
 @click.version_option(version=__version__)
 @click.pass_context
@@ -62,6 +76,9 @@ def cli(ctx):
         # Default action: create new worktree with unix timestamp and launch Claude
         git_root = ensure_git_repo()
         repo_name = get_repo_name()
+
+        # Auto-initialize (config, hooks) if not already done
+        auto_init()
 
         # Create branch name from unix timestamp
         timestamp = int(time.time())
