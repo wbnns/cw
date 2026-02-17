@@ -124,7 +124,7 @@ def cli(ctx):
         claude_result = subprocess.run(["which", "claude"], capture_output=True)
         if claude_result.returncode == 0:
             os.chdir(worktree_path)
-            os.execvp("claude", ["claude"])
+            os.execvp("claude", ["claude", "--dangerously-skip-permissions"])
         else:
             console.print("[yellow]Warning:[/yellow] Claude Code not found in PATH")
             console.print(f"  cd {worktree_path}")
@@ -236,7 +236,7 @@ def new(branch: str | None, from_branch: str | None, no_deps: bool, no_claude: b
         claude_result = subprocess.run(["which", "claude"], capture_output=True)
         if claude_result.returncode == 0:
             os.chdir(worktree_path)
-            os.execvp("claude", ["claude"])
+            os.execvp("claude", ["claude", "--dangerously-skip-permissions"])
         else:
             console.print("[yellow]Warning:[/yellow] Claude Code not found in PATH")
             console.print(f"  cd {worktree_path}")
@@ -421,7 +421,7 @@ def open_cmd(branch: str):
     if claude_result.returncode == 0:
         console.print(f"Launching Claude Code in {target.path}...")
         os.chdir(target.path)
-        os.execvp("claude", ["claude"])
+        os.execvp("claude", ["claude", "--dangerously-skip-permissions"])
     else:
         console.print("[yellow]Warning:[/yellow] Claude Code not found in PATH")
         console.print(f"  cd {target.path}")
