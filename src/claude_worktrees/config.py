@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
         "auto_cleanup": True,
     },
     "deps": {
-        "strategy": "symlink",  # symlink | copy | custom
+        "strategy": "symlink",  # symlink | copy | custom | auto
         "post_create_hook": None,
     },
     "github": {
@@ -89,8 +89,14 @@ worktree_base = "~/.claude-worktrees"  # Where worktrees are stored
 auto_cleanup = true                     # Enable post-fetch cleanup
 
 [deps]
-strategy = "symlink"  # symlink | copy | custom
-# For custom strategy, uncomment:
+strategy = "symlink"  # symlink | copy | custom | auto
+# Strategies:
+#   symlink - Symlink node_modules, .venv, etc. from main repo (fast, shared)
+#   copy    - Copy-on-write clone of dependency dirs (isolated, macOS only)
+#   custom  - Run post_create_hook command (full control)
+#   auto    - Detect lockfiles and run appropriate install command
+#
+# For custom strategy, set post_create_hook:
 # post_create_hook = "pnpm install --frozen-lockfile"
 
 [github]
